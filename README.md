@@ -9,13 +9,18 @@ Example
 ```coffeescript
 Mud = require 'mud'
 
-Mud.render ->
+template = ->
   @doctype 'html'
   @html =>
     @head =>
       @title 'Hello World'
     @body =>
-      @p class: 'intro', 'Hi there from Mud!'
+      @p class: 'intro', "Hi there from #{ @model.name }!"
+      
+model =
+	name: 'Mud'
+	
+Mud.render template, model
 ```
 
 Output
