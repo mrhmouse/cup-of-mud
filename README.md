@@ -17,3 +17,23 @@ Mud.render ->
     @body =>
       @p class: 'intro', 'Hi there from Mud!'
 ```
+
+Output
+------
+
+```html
+<!DOCTYPE html>
+	
+<html>
+	<head>
+		<title>
+			Hello World
+		</title>
+	</head>
+	<body>
+		<p class='intro'>
+			Hi there from Mud!
+		</p>
+	</body>
+</html>
+```
