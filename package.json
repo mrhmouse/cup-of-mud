@@ -1,0 +1,35 @@
+{
+  "name": "mud",
+  "description": "A simple template framework in pure CoffeeScript.",
+  "version": "0.0.1",
+  "main": "mud.coffee",
+  "keywords": [
+		"template",
+		"html",
+		"markup"
+  ],
+  "homepage": "https://github.com/mrhmouse/mud.git",
+  "bugs": {
+    "url": "https://github.com/mrhmouse/mud/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Jordan Brown",
+    "email": "mrhmouse@gmail.com"
+  },
+  "files": [
+    "mud.coffee",
+    "AUTHORS"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mrhmouse/mud.git"
+  },
+  "contributors": [
+    {
+      "name": "Jordan Brown",
+      "email": "mrhmouse@gmail.com"
+    }
+  ],
+	"private" : true
+}
