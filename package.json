@@ -2,7 +2,7 @@
   "name": "mud",
   "description": "A simple template framework in pure CoffeeScript.",
   "version": "0.0.1",
-  "main": "mud.coffee",
+  "main": "mud.litcoffee",
   "keywords": [
 		"template",
 		"html",

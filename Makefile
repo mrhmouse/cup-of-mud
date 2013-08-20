@@ -1,5 +1,5 @@
 mud.js:
-	coffee -c mud.coffee
+	coffee -c mud.litcoffee
 
 clean:
 	rm mud.js
