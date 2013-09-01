@@ -17,3 +17,7 @@ Vows.describe( 'Mud Template Framework' )
 			Assert.equal '&amp;', Mud -> @text '&'
 		'raw text unescaped': ->
 			Assert.equal '&', Mud -> @raw '&'
+		'numbers properly': ->
+			Assert.equal '42', Mud -> @text 42
+		'nothing for `undefined`': ->
+			Assert.equal '', Mud ->

@@ -30,7 +30,16 @@ Mud is the collection of all tags. It is also a function that,
 when passed a callback, calls that callback with itself as the
 context.
 
-	Mud = ( callback ) -> callback.call Mud
+	Mud = ( callback ) ->
+		result = ''
+		items = callback.call Mud
+		if items?.length
+			for item in items
+				result += switch typeof item
+					when 'string', 'number' then item
+					when 'object' then JSON.stringify item
+					when 'function' then Mud item
+		result
 
 The `Tag` class describes an HTML tag.
 
@@ -68,17 +77,19 @@ The `Tag` class describes an HTML tag.
 		html: ( value ) ->
 			switch typeof value
 				when 'object' then JSON.stringify object
-				when 'function' then value.call Mud
+				when 'function' then Mud value
 				else
 					value
+						.toString()
 						.replace( /</g, '&lt;' )
 						.replace( /&/g, '&amp;' )
 		attribute: ( value ) ->
 			switch typeof value
 				when 'object' then JSON.stringify object
-				when 'function' then value.call Mud
+				when 'function' then Mud value
 				else
 					value
+						.toString()
 						.replace( /</g, '&lt;' )
 						.replace( /&/g, '&amp;' )
 						.replace( /\\/g, '\\\\' )
@@ -105,7 +116,7 @@ Here we add all of the tags to the Mud collection.
 			switch typeof arg
 				when 'string', 'number' then arg
 				when 'object' then JSON.stringify arg
-				when 'function' then arg.call Mud )
+				when 'function' then Mud arg )
 		result.join ''
 
 	module.exports = Mud
