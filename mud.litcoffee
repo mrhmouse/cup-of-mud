@@ -1,20 +1,4 @@
-Mud
-===
-
-Mud is a simple template framework for HTML documents
-(primarily HTML5) written in pure CoffeeScript.
-
-Tags
-----
-
-This section defines all of the supported tags in `Mud`.
-Each tag is listed as either _void_ or _normal_.
-_Void_ tags are those that are self-closing,
-while _normal_ tags require a closing tag.
-
-An example of a void tag would be the break tag,
-`<br>`, while an example of a normal tag would be
-the paragraph tag, `<p></p>`.
+All available HTML tags are listed below.
 
 	TAGS =
 
@@ -42,161 +26,86 @@ the paragraph tag, `<p></p>`.
 		output details summary
 		'''.split /\s+/
 
-The `STRINGIFY` function is a helper that
-converts a function, object, or string into
-a string that is safe for HTML display.
+Mud is the collection of all tags. It is also a function that,
+when passed a callback, calls that callback with itself as the
+context.
 
-	STRINGIFY = ( item ) ->
-		switch typeof item
-			when 'function'
-				item()
-			when 'object'
-				JSON.stringify item
-			else
-				ESCAPE item.toString()
+	Mud = ( callback ) -> callback.call Mud
 
-The `ESCAPE` function is a helper that
-makes a string safe for HTML display.
-
-	ESCAPE = ( text ) ->
-		text
-			.replace( />/g, '&gt;' )
-			.replace( /</g, '&lt;' )
-			.replace( /"/g, '&quot;' )
-
-Tag
-===
-
-The `Tag` class represents a single tag.
-It's used internally to print the opening,
-closing, and content sections of an HTML
-element.
+The `Tag` class describes an HTML tag.
 
 	class Tag
-		constructor: ( @name, @void = no ) ->
+		constructor: ( @name, @void = false ) ->
 
-		open: ( attributes ) ->
+		render: ( args... ) ->
+			body = []
+			attributes = {}
 
-All tags open the same way.
+			for arg in args
+				switch typeof arg
+					when 'string', 'number', 'function'
+						body.push arg
+					when 'object'
+						attributes[name] = value for own name, value of arg
 
 			result = "<#{ @name }"
+			attributes = ( for own name, value of attributes
+				"#{ ESCAPE.attribute name }='#{ ESCAPE.attribute value }'" )
+			if attributes.length isnt 0
+				result += ' '
+				result += attributes.join ' '
 
-To write the attributes of a tag, we
-stringify each value and create an HTML-safe
-map to insert into the opening section.
-
-			if typeof attributes is 'object'
-				map = do -> for own name, value of attributes
-					"#{ name }='#{ STRINGIFY( value )
-						.replace( /\\/g, '\\\\' )
-						.replace( /'/g, '\\\'' )}'"
-				result += ' ' + map.join ' '
-
-All opening tags close the same way.
-
-			result += '>'
-
-Unless a tag is _void_ (and therefore doesn't need
-to be closed), this writes the closing tag.
-
-		close: ->
-			unless @void
-				"</#{ @name }>"
-
-The content section is written by stringifying
-the given content into an HTML-safe string.
-
-		content: ( attributes, content ) ->
-			unless typeof attributes is 'object'
-				content = attributes
-
-			unless @void
-				"#{ STRINGIFY content }"
+			if @void
+				result += '/>'
 			else
-				''
+				result += '>'
+				result += ESCAPE.html item for item in body
+				result += "</#{ @name }>"
 
-The doctype is a special type of tag
-with the format `<!DOCTYPE html>`.
+			result
 
-	class DocType extends Tag
-		constructor: ->
-			@name = 'doctype'
-			@void = yes
+	ESCAPE =
+		html: ( value ) ->
+			switch typeof value
+				when 'object' then JSON.stringify object
+				when 'function' then value.call Mud
+				else
+					value
+						.replace( /</g, '&lt;' )
+						.replace( /&/g, '&amp;' )
+		attribute: ( value ) ->
+			switch typeof value
+				when 'object' then JSON.stringify object
+				when 'function' then value.call Mud
+				else
+					value
+						.replace( /</g, '&lt;' )
+						.replace( /&/g, '&amp;' )
+						.replace( /\\/g, '\\\\' )
+						.replace( /'/g, '\\\'' )
 
-		open: ( args... ) -> "<!DOCTYPE #{ args.join ' ' }>"
+Here we add all of the tags to the Mud collection.
 
-		content: -> ''
+	for name in TAGS.normal
+		do ( name ) ->
+			tag = new Tag name
+			Mud[name] = ( args... ) -> tag.render args...
 
-		close: -> ''
+	for name in TAGS.void
+		do ( name ) ->
+			tag = new Tag name, yes
+			Mud[name] = ( args... ) -> tag.render args...
 
-Template
-========
+	Mud.text = ( args... ) ->
+		result = ( ESCAPE.html arg for arg in args )
+		result.join ''
 
-The `Template` is the main class of `Mud` and what users
-will receive as the module. It defines one function,
-`render`, which accepts a callback that it uses to generate
-a string.
+	Mud.raw = ( args... ) ->
+		result = ( for arg in args
+			switch typeof arg
+				when 'string', 'number' then arg
+				when 'object' then JSON.stringify arg
+				when 'function' then arg.call Mud )
+		result.join ''
 
-	class Template
-		level = 0
-
-		constructor: ->
-			@tags = [ new DocType() ]
-			@tags.push new Tag tag, yes for tag in TAGS.void
-			@tags.push new Tag tag for tag in TAGS.normal
-
-`render` accepts a callback and a model. The callback
-is invoked in the context of all of `Mud`'s helper
-functions, so they are available bound to `this` or `@`.
-
-		render: ( action, model ) ->
-			writers = { model }
-			result = []
-			content = no
-
-Some helper functions for pretty printing our tags.
-
-			add = ( arg ) -> result.push arg
-
-			newline = -> add '\n'
-
-			tab = -> add '\t'
-
-			indent = ->
-				tab() for i in [0...level]
-
-A function is bound for each tag that
-creates properly indented markup.
-
-			for tag in @tags
-				do ( tag ) ->
-					writers[tag.name] = ( args... ) ->
-						newline() unless content or level is 0
-						indent() unless content
-						add tag.open args...
-
-						newline()
-						level += 1
-						indent()
-						content = yes
-						result.push tag.content args...
-						content = no
-
-						newline()
-						level -= 1
-						indent()
-						result.push tag.close args...
-						''
-
-			action.call writers
-			result.join ''
-
-	Mud = new Template()
-
-If we're running in the browser, our `exports` object
-should be `window`.
-
-	if window?
-		window.Mud = Mud
-	else
-		module.exports = Mud
+	module.exports = Mud
