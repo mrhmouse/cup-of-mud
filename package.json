@@ -6,7 +6,9 @@
   "keywords": [
 		"template",
 		"html",
-		"markup"
+		"markup",
+		"mud",
+		"coffeescript"
   ],
   "homepage": "https://github.com/mrhmouse/cup-of-mud",
   "bugs": {
@@ -18,8 +20,9 @@
     "email": "mrhmouse@gmail.com"
   },
   "files": [
-    "mud.coffee",
-    "AUTHORS"
+    "mud.js",
+    "AUTHORS",
+		"LICENSE"
   ],
   "repository": {
     "type": "git",
@@ -30,6 +33,5 @@
       "name": "Jordan Brown",
       "email": "mrhmouse@gmail.com"
     }
-  ],
-	"private" : true
+  ]
 }
