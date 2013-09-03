@@ -53,6 +53,6 @@ Output
 Available Functions
 -------------------
 
-Every valid HTML5 tag should be usable within `Cup of Mud`, with the exception of `DOCTYPE` and comment tags.
-Tags that are defined as `void` by the spec will not print any body.
-All non-void tags are closed XHTML style, i.e. `<script></script>` instead of `<script><script>`
+Every valid HTML5 tag should be usable within *Cup of Mud*, with the exception of `DOCTYPE` and comment tags.
+Tags that are defined as _void_ by the spec will not print any body.
+All non-_void_ tags are closed XHTML style, i.e. `<script></script>` instead of `<script><script>`
