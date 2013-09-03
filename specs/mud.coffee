@@ -21,3 +21,4 @@ Vows.describe( 'Mud Template Framework' )
 			Assert.equal '42', Mud -> @text 42
 		'nothing for `undefined`': ->
 			Assert.equal '', Mud ->
+.export module

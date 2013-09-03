@@ -1,3 +1,7 @@
+Toggle this for debug mode.
+
+	DEBUG = off
+
 All available HTML tags are listed below.
 
 	TAGS =
@@ -26,20 +30,35 @@ All available HTML tags are listed below.
 		output details summary
 		'''.split /\s+/
 
+This is a helper method to properly indent a section.
+
+	INDENT = do ->
+		line = /^/gm
+		( item ) ->
+			indentation = ''
+			indentation += '\t' for i in [0...Mud.INDENTATION] if Mud.INDENTATION > 0
+			item.replace line, indentation
+
 Mud is the collection of all tags. It is also a function that,
 when passed a callback, calls that callback with itself as the
 context.
 
-	Mud = ( callback ) ->
+	Mud = ( args... ) ->
 		result = ''
-		items = callback.call Mud
-		if items?.length
-			for item in items
-				result += switch typeof item
-					when 'string', 'number' then item
-					when 'object' then JSON.stringify item
-					when 'function' then Mud item
-		result
+		if args?
+			for arg in args when arg?
+				if Array.isArray arg
+					result += Mud arg...
+				else
+					result += switch typeof arg
+						when 'string' then arg
+						when 'number' then arg.toString()
+						when 'object' then JSON.stringify arg
+						when 'function' then Mud arg.call Mud
+						else ''
+			result
+
+	Mud.INDENTATION = 0
 
 The `Tag` class describes an HTML tag.
 
@@ -47,6 +66,7 @@ The `Tag` class describes an HTML tag.
 		constructor: ( @name, @void = false ) ->
 
 		render: ( args... ) ->
+			console.log INDENT @name if DEBUG
 			body = []
 			attributes = {}
 
@@ -57,32 +77,37 @@ The `Tag` class describes an HTML tag.
 					when 'object'
 						attributes[name] = value for own name, value of arg
 
-			result = "<#{ @name }"
+			result = '\n' + INDENT "<#{ @name }"
 			attributes = ( for own name, value of attributes
 				"#{ ESCAPE.attribute name }='#{ ESCAPE.attribute value }'" )
 			if attributes.length isnt 0
-				result += ' '
-				result += attributes.join ' '
+				result += ' ' + attributes.join ' '
 
 			if @void
-				result += '/>'
+				result += '/>\n'
 			else
-				result += '>'
-				result += ESCAPE.html item for item in body
-				result += "</#{ @name }>"
+				result += '>\n'
+				Mud.INDENTATION += 1
+				console.log INDENT "#{ @name }::body" if DEBUG
+				result += Mud ESCAPE.html item for item in body
+				Mud.INDENTATION -= 1
+				result += '\n' + INDENT Mud "</#{ @name }>\n"
 
 			result
 
 	ESCAPE =
-		html: ( value ) ->
-			switch typeof value
-				when 'object' then JSON.stringify object
-				when 'function' then Mud value
+		html: do ->
+			replace = ( value ) -> value
+				.replace( /</g, '&lt;' )
+				.replace( /&/g, '&amp;' )
+
+			( value ) -> switch typeof value
+				when 'string', 'number'
+					INDENT replace value.toString()
+				when 'object'
+					INDENT JSON.stringify value
 				else
 					value
-						.toString()
-						.replace( /</g, '&lt;' )
-						.replace( /&/g, '&amp;' )
 		attribute: ( value ) ->
 			switch typeof value
 				when 'object' then JSON.stringify object
