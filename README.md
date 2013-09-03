@@ -1,4 +1,4 @@
-mud
+cup-of-mud
 ===
 
 A simple template framework written in pure CoffeeScript. Intended to be small and simple, not featureful.
@@ -7,20 +7,20 @@ Example
 -------
 
 ```coffeescript
-Mud = require 'mud'
+Mud = require 'cup-of-mud'
 
-template = ->
-  @doctype 'html'
-  @html =>
-    @head =>
-      @title 'Hello World'
-    @body =>
-      @p class: 'intro', "Hi there from #{ @model.name }!"
-      
-model =
-	name: 'Mud'
-	
-Mud.render template, model
+Mud -> [
+	@raw '<!DOCTYPE html>'
+	@html -> [
+		@head ->
+			@title 'Hello, world!'
+		@body ->
+			@p '''
+				This is an example of the
+				Cup of Mud template framework.
+			'''
+	]
+]
 ```
 
 Output
@@ -28,17 +28,24 @@ Output
 
 ```html
 <!DOCTYPE html>
-	
 <html>
+
 	<head>
+
 		<title>
-			Hello World
+			Hello, world!
 		</title>
+
 	</head>
+
 	<body>
-		<p class='intro'>
-			Hi there from Mud!
+
+		<p>
+			This is an example of the
+			Cup of Mud template framework.
 		</p>
+
 	</body>
+
 </html>
 ```
